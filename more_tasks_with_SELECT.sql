@@ -100,3 +100,27 @@ FROM jobs j
 JOIN employees e ON (j.job_id = e.job_id)
 GROUP BY job_title
 HAVING AVG(salary) = (SELECT MAX(AVG(salary)) FROM employees GROUP BY job_id);
+
+-- Найдите информацию о сотрудниках у которых job_id такой же как job_id из таблицы JOBS где min_salary>8000
+SELECT first_name, last_name, job_id, salary FROM employees
+WHERE job_id IN (SELECT job_id FROM jobs WHERE min_salary > 8000);
+
+-- Найдите информацию о сотрудниках чья зарплата больше зарплаты работников в департаменте с id = 100
+SELECT first_name, last_name, job_id, salary FROM employees
+WHERE salary > ANY(SELECT salary from employees WHERE department_id = 100);
+
+-- Найдите имена департаментов где есть работники
+--v1 JOIN
+SELECT DISTINCT department_name
+FROM employees e
+JOIN departments d ON (e.department_id = d.department_id);
+
+--V2 SUBQUERY
+SELECT department_name
+FROM departments
+WHERE department_id IN (SELECT DISTINCT department_id FROM employees);
+
+-- Найдите работников кто получает зарплату больше чем средняя зарплата по своему департаменту
+SELECT e1.first_name, e1.last_name, e1.salary FROM employees e1
+WHERE salary > (SELECT AVG(e2.salary) FROM employees e2
+WHERE e2.department_id = e1.department_id);
